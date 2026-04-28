@@ -11,8 +11,8 @@ serial_trigger_sender:
   ros__parameters:
     port: /dev/ttyUSB0
     baudrate: 115200
-    control_topic: /cango_control_final
-    vibration_pwm_on: 120
+    control_topic: /master2control
+    vibration_pwm_on: 60
     vibration_pwm_off: 0
 
     

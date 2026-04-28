@@ -18,7 +18,9 @@ public:
     declare_parameter<std::string>("port", "/dev/ttyUSB0");
     declare_parameter<int>("baudrate", 115200);
 
-    declare_parameter<std::string>("control_topic", "/cango_control_final");
+    // master에서 오는 진동 명령만 받음
+    declare_parameter<std::string>("control_topic", "/master2control");
+
     declare_parameter<int>("vibration_pwm_on", 120);
     declare_parameter<int>("vibration_pwm_off", 0);
 
@@ -38,7 +40,7 @@ public:
 
     RCLCPP_INFO(
       get_logger(),
-      "Vibration sender ready. topic: %s, port: %s",
+      "Vibration sender ready. sub topic: %s, port: %s",
       control_topic_.c_str(),
       port_.c_str()
     );
@@ -46,6 +48,7 @@ public:
 
 private:
   int fd_ = -1;
+
   std::string port_;
   std::string control_topic_;
   int baudrate_;
@@ -58,12 +61,14 @@ private:
   bool open_serial()
   {
     fd_ = open(port_.c_str(), O_RDWR | O_NOCTTY);
+
     if (fd_ < 0) {
       RCLCPP_ERROR(get_logger(), "open failed: %s", strerror(errno));
       return false;
     }
 
     termios tty {};
+
     if (tcgetattr(fd_, &tty) != 0) {
       RCLCPP_ERROR(get_logger(), "tcgetattr failed: %s", strerror(errno));
       close(fd_);
@@ -74,10 +79,20 @@ private:
     cfmakeraw(&tty);
 
     speed_t speed;
+
     switch (baudrate_) {
-      case 9600: speed = B9600; break;
-      case 57600: speed = B57600; break;
-      case 115200: speed = B115200; break;
+      case 9600:
+        speed = B9600;
+        break;
+
+      case 57600:
+        speed = B57600;
+        break;
+
+      case 115200:
+        speed = B115200;
+        break;
+
       default:
         RCLCPP_ERROR(get_logger(), "Unsupported baudrate: %d", baudrate_);
         close(fd_);
@@ -125,13 +140,23 @@ private:
     packet[4] = pwm;
     packet[5] = checksum(packet[2], packet[3], packet[4]);
 
-    write(fd_, packet, 6);
+    ssize_t written = write(fd_, packet, 6);
+
+    if (written != 6) {
+      RCLCPP_WARN(
+        get_logger(),
+        "Serial write incomplete. written: %ld",
+        written
+      );
+      return;
+    }
 
     RCLCPP_INFO(get_logger(), "Vibration PWM Sent: %d", pwm);
   }
 
   void callback(const cango_msgs::msg::RobotControl::SharedPtr msg)
   {
+    // master2control에서 vibration만 사용
     bool vibration = msg->vibration;
 
     // 값이 바뀔 때만 전송
@@ -152,7 +177,7 @@ private:
   }
 };
 
-int main(int argc, char **argv)
+int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<SerialTriggerSender>();
