@@ -1,0 +1,25 @@
+serial_joystick_receiver:
+  ros__parameters:
+    port: /dev/ttyUSB0
+    baudrate: 115200
+    center_x: 512.0
+    center_y: 512.0
+    scale_x: 512.0
+    scale_y: 512.0
+
+serial_trigger_sender:
+  ros__parameters:
+    port: /dev/ttyUSB0
+    baudrate: 115200
+    control_topic: /cango_control_final
+    vibration_pwm_on: 120
+    vibration_pwm_off: 0
+
+    
+joy_to_robot_control:
+  ros__parameters:
+    max_linear_speed: 2.0
+    max_ang_speed: 0.5
+    max_side_speed: 0.2
+    deadzone: 0.08
+    button_hold_time_sec: 2.0 

@@ -1,0 +1,8 @@
+serial_joystick_receiver:
+  ros__parameters:
+    port: /dev/ttyUSB0
+    baudrate: 115200
+    center_x: 512.0
+    center_y: 512.0
+    scale_x: 512.0
+    scale_y: 512.0
