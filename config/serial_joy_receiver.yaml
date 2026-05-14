@@ -1,6 +1,6 @@
 serial_joystick_receiver:
   ros__parameters:
-    port: /dev/ttyUSB1
+    port: /dev/ttyUSB0
     baudrate: 115200
     center_x: 512.0
     center_y: 512.0
@@ -9,7 +9,7 @@ serial_joystick_receiver:
 
 serial_trigger_sender:
   ros__parameters:
-    port: /dev/ttyUSB1
+    port: /dev/ttyUSB0
     baudrate: 115200
     control_topic: /master2control
     vibration_pwm_on: 60
@@ -18,8 +18,8 @@ serial_trigger_sender:
     
 joy_to_robot_control:
   ros__parameters:
-    max_linear_speed: 0.2
+    max_linear_speed: 0.5
     max_ang_speed: 0.5
-    max_side_speed: 0.2
+    max_side_speed: 0.3
     deadzone: 0.08
     button_hold_time_sec: 2.0 
